@@ -4,6 +4,14 @@ import argparse
 import os
 
 
+def collect_images(folder: Path):
+    exts = ("*.jpg", "*.jpeg", "*.png")
+    files = []
+    for pattern in exts:
+        files.extend(folder.glob(pattern))
+    return sorted([p for p in files if p.is_file()])
+
+
 def main():
     ap = argparse.ArgumentParser(description="Flatten left/right image folders into a COLMAP images directory.")
     ap.add_argument("--left_dir", required=True, help="Directory containing left images")
@@ -16,11 +24,11 @@ def main():
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    left_files = sorted(p for p in left_dir.glob("*.jpg"))
-    right_files = sorted(p for p in right_dir.glob("*.jpg"))
+    left_files = collect_images(left_dir)
+    right_files = collect_images(right_dir)
 
-    left_names = [p.name for p in left_files]
-    right_names = [p.name for p in right_files]
+    left_names = [p.stem for p in left_files]
+    right_names = [p.stem for p in right_files]
     if left_names != right_names:
         raise SystemExit("left/right image names do not match")
 
@@ -29,8 +37,8 @@ def main():
             src.unlink()
 
     for idx, (left_path, right_path) in enumerate(zip(left_files, right_files)):
-        left_name = output_dir / f"{idx:06d}_left.jpg"
-        right_name = output_dir / f"{idx:06d}_right.jpg"
+        left_name = output_dir / f"{idx:06d}_left{left_path.suffix.lower()}"
+        right_name = output_dir / f"{idx:06d}_right{right_path.suffix.lower()}"
         os.symlink(left_path.resolve(), left_name)
         os.symlink(right_path.resolve(), right_name)
 

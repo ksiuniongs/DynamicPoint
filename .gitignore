@@ -216,6 +216,10 @@ output/
 outputs/
 logs/
 
+# Local external checkouts and binary notes
+submodules/
+*.pdf
+
 # Reconstruction and visualization artifacts
 *.db
 *.gif

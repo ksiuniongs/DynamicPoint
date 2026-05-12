@@ -105,7 +105,7 @@ def project_equirect_to_pinhole(img, out_w, out_h, fov_deg, yaw_deg, pitch_deg):
     return np.clip(out, 0, 255).astype(np.uint8)
 
 
-def extract_frames(video_path, frames_dir, start_time, duration):
+def extract_frames(video_path, frames_dir, start_time, duration, fps=None):
     frames_dir.mkdir(parents=True, exist_ok=True)
     cmd = [
         "ffmpeg",
@@ -116,12 +116,14 @@ def extract_frames(video_path, frames_dir, start_time, duration):
         str(video_path),
         "-t",
         duration,
-        "-vsync",
-        "0",
         "-start_number",
         "0",
-        str(frames_dir / "frame_%06d.jpg"),
     ]
+    if fps is not None:
+        cmd.extend(["-vf", f"fps={fps}"])
+    else:
+        cmd.extend(["-vsync", "0"])
+    cmd.append(str(frames_dir / "frame_%06d.jpg"))
     subprocess.run(cmd, check=True)
 
 
@@ -151,6 +153,7 @@ def main():
     ap.add_argument("--output_root", required=True, help="Output root directory")
     ap.add_argument("--start", default="00:08:00", help="Start time, e.g. 00:08:00")
     ap.add_argument("--duration", default="10", help="Duration in seconds")
+    ap.add_argument("--fps", type=float, default=None, help="Optional frame extraction FPS before view rendering")
     ap.add_argument("--size", default="1080x1080", help="Pinhole view size WxH")
     ap.add_argument("--fov", type=float, default=90.0, help="Horizontal FOV in degrees")
     ap.add_argument("--views_dir_name", default="views_scgs", help="Subdirectory name for rendered views")
@@ -162,7 +165,7 @@ def main():
     views_dir = output_root / args.views_dir_name
 
     if not args.skip_extract:
-        extract_frames(Path(args.video), frames_dir, args.start, args.duration)
+        extract_frames(Path(args.video), frames_dir, args.start, args.duration, args.fps)
     render_views(frames_dir, views_dir, args.size, args.fov)
 
 

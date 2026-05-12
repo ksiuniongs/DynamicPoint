@@ -1,0 +1,15 @@
+voxel_ds: 0.10
+voxel_back: 0.10
+grid_res: 0.5
+ground_stat: p10
+fill_holes: true
+h_ground_max: 0.30
+pca_k: 30
+pca_chunk_size: 25000
+h_tree_min: 3.0
+h_mid: 2.0
+v_thr: 0.4
+smooth_k: 12
+smooth_support_ratio: 0.60
+metrics_k: 8
+up_axis: auto
