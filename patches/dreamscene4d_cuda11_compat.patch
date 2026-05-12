@@ -1,0 +1,69 @@
+diff --git a/simple-knn/setup.py b/simple-knn/setup.py
+index 580d2bd..c4ad308 100644
+--- a/simple-knn/setup.py
++++ b/simple-knn/setup.py
+@@ -14,6 +14,12 @@ from torch.utils.cpp_extension import CUDAExtension, BuildExtension
+ import os
+
+ cxx_compiler_flags = []
++conda_prefix = os.environ.get("CONDA_PREFIX", "")
++cuda_include_dirs = []
++for rel in ("targets/x86_64-linux/include", "include"):
++    path = os.path.join(conda_prefix, rel)
++    if conda_prefix and os.path.isdir(path):
++        cuda_include_dirs.append(path)
+
+ if os.name == 'nt':
+     cxx_compiler_flags.append("/wd4624")
+@@ -27,6 +33,7 @@ setup(
+             "spatial.cu",
+             "simple_knn.cu",
+             "ext.cpp"],
++            include_dirs=cuda_include_dirs,
+             extra_compile_args={"nvcc": [], "cxx": cxx_compiler_flags})
+         ],
+     cmdclass={
+diff --git a/simple-knn/simple_knn.cu b/simple_knn/simple_knn.cu
+index e72e4c9..2f3f0d2 100644
+--- a/simple-knn/simple_knn.cu
++++ b/simple-knn/simple_knn.cu
+@@ -16,6 +16,7 @@
+ #include "simple_knn.h"
+ #include <cub/cub.cuh>
+ #include <cub/device/device_radix_sort.cuh>
++#include <cfloat>
+ #include <vector>
+ #include <cuda_runtime_api.h>
+ #include <thrust/device_vector.h>
+@@ -218,4 +219,4 @@ void SimpleKNN::knn(int P, float3* points, float* meanDists)
+ 	boxMeanDist << <num_boxes, BOX_SIZE >> > (P, points, indices_sorted.data().get(), boxes.data().get(), meanDists);
+
+ 	cudaFree(result);
+-}
+\ No newline at end of file
++}
+diff --git a/setup.py b/setup.py
+index bb7220d..f7a6c12 100644
+--- a/setup.py
++++ b/setup.py
+@@ -13,6 +13,12 @@ from setuptools import setup
+ from torch.utils.cpp_extension import CUDAExtension, BuildExtension
+ import os
+ os.path.dirname(os.path.abspath(__file__))
++conda_prefix = os.environ.get("CONDA_PREFIX", "")
++cuda_include_dirs = []
++for rel in ("targets/x86_64-linux/include", "include"):
++    path = os.path.join(conda_prefix, rel)
++    if conda_prefix and os.path.isdir(path):
++        cuda_include_dirs.append(path)
+
+ setup(
+     name="diff_gaussian_rasterization",
+@@ -26,6 +32,7 @@ setup(
+             "cuda_rasterizer/backward.cu",
+             "rasterize_points.cu",
+             "ext.cpp"],
++            include_dirs=cuda_include_dirs,
+             extra_compile_args={"nvcc": ["-I" + os.path.join(os.path.dirname(os.path.abspath(__file__)), "third_party/glm/")]})
+         ],
+     cmdclass={

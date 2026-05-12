@@ -205,3 +205,25 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+
+data*
+
+loganPark*
+
+# Pipeline runtime outputs
+output/
+outputs/
+logs/
+
+# Reconstruction and visualization artifacts
+*.db
+*.gif
+*.mp4
+*.npy
+*.obj
+*.ply
+*.pkl
+*.pt
+*.pth
+*.zipbackup
