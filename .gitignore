@@ -217,6 +217,7 @@ outputs/
 logs/
 
 # Local external checkouts and binary notes
+/.gitmodules
 submodules/
 *.pdf
 
